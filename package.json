@@ -1,0 +1,20 @@
+{
+  "name": "Katara",
+  "version": "0.0.0",
+  "description": "Roster module for RedAPI",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "Cornell",
+    "Roster"
+  ],
+  "author": "mrkev",
+  "license": "MIT",
+  "dependencies": {
+    "es6-promise": "^1.0.0",
+    "obender": "^0.1.1",
+    "xml2js": "^0.4.4"
+  }
+}
