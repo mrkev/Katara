@@ -167,6 +167,11 @@ var remap_courses = function (subject) {
 			open_array('notes', sct);
 			magic(sct, 'notes', 'note', function () {}); // TODO: Does magic work with null -function
 		});
+
+
+		open_array('topics', obj);
+		magic(obj, 'topics', 'topic', function () {});
+
 	});
 
 };
