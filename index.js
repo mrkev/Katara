@@ -160,8 +160,9 @@ var remap_courses = function (subject) {
 				}, sct.meeting);
 
 				if (sct.meeting.instructors !== undefined)  {
-					open_array('instructors', sct.meeting); }
-				magic(sct.meeting, 'instructors', 'instructor', function () {});
+					open_array('instructors', sct.meeting); 
+					magic(sct.meeting, 'instructors', 'instructor', function () {});
+				}
 			}
 			
 			open_array('notes', sct);
@@ -186,8 +187,8 @@ var magic = function (object, outside, inside, func) {
 
 	// Die if outside doesn't exist.
 	if (object[outside] === undefined) {
+		console.dir(object);
 		console.dir(object[outside]);
-
 		throw new Error('DAMN MAGIC');
 	}
 	
