@@ -187,7 +187,6 @@ var magic = function (object, outside, inside, func) {
 	// Die if outside doesn't exist.
 	if (object[outside] === undefined) {
 		console.dir(object[outside]);
-		console.dir(object[outside][inside]);
 
 		throw new Error('DAMN MAGIC');
 	}
