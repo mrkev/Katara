@@ -1,6 +1,6 @@
 {
   "name": "Katara",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Roster module for RedAPI",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,9 @@
   "license": "MIT",
   "dependencies": {
     "es6-promise": "^1.0.0",
+    "nom": "0.0.3",
     "obender": "^0.1.1",
+    "request-promise": "0.0.4",
     "xml2js": "^0.4.4"
   }
 }
