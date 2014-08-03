@@ -8,7 +8,7 @@ var xml2js  = require('xml2js');
 var rp      = require('request-promise');
 
 /**
- * Katara v0.0.0
+ * Katara v0.0.1
  *
  * Exports for the module.
  * @return {NetPrintSource}
