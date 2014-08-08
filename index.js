@@ -7,6 +7,8 @@ var remap   = require('obender').remap;
 var xml2js  = require('xml2js');
 var rp      = require('request-promise');
 
+// Descriptions from database.
+var descdb = require('./descdb.js');
 /**
  * Katara v0.0.1
  *
@@ -14,11 +16,12 @@ var rp      = require('request-promise');
  * @return {NetPrintSource}
  */
 module.exports = (function () {
-    function RedRosterSource(url) {
+
+    function RedRosterSource(url, options) {
         var self = this;
         self._url = url;
-        self.interval = 604800000 / 7; // One day
-        self.data = {};
+        self.interval = options ? options.interval : 604800000 / 7; // One day
+        self.data = options ? options.cache : {};
         // We will clear the data every day to get fresh, updated info.
         self.timer = setTimeout(self.clear, self.interval);
     }
@@ -38,7 +41,7 @@ module.exports = (function () {
         var url   = self._url + term + '/' + subj + (subj === '' ? '' : '/') 
                     + 'xml/';
 
-        return new Promise(function (resolve, reject) {
+        var tereshkova = new Promise(function (resolve, reject) {
 
             // Query XML
             return rp(url)
@@ -49,23 +52,43 @@ module.exports = (function () {
             // Remove them crazy dollar signs.
             .then(undollarify)
 
-            // Fix all the madness
-            .then(function (data) {
+            // End this chain.
+            .then(resolve)
 
-                // On Roster choosing page. Remove XML attribute and replace 
-                // with JSON attribute
-                if (data.subjects !== undefined)    {remap_homepage(data);}
-                else                                {remap_courses(data);}
-
-                self.data[term] = self.data[term] || {};
-                self.data[term][subj] = data;
-                resolve(data);
-            })
-
-
+            // Ohai.
             .catch(reject);
 
         });
+
+        if (subj === '') {
+            
+            // Fix the homepage's madness
+            tereshkova.then(remap_homepage);
+
+        } else {
+
+            // Fix the subject page's madness
+            tereshkova.then(remap_courses)
+
+            // Add CID
+            .then(cidify)
+
+            // Inject descriptions
+            .then(inject_descriptions);
+
+        }
+
+        return tereshkova
+
+            // Cache the data
+            .then(function (data) {
+                self.data[term] = self.data[term] || {};
+                self.data[term][subj] = data;
+
+                return data;
+            })
+
+            .catch(console.trace);
     };
 
 
@@ -86,6 +109,36 @@ module.exports = (function () {
 
     return new RedRosterSource('http://registrar.sas.cornell.edu/courses/roster/');
 })();
+
+var cidify = function (data) {
+    console.log('Adding ids');
+    data.courses.forEach(function (course) {
+        var cid = course.subject_key + course.catalog_number; //+ '-' + course.sections[0].associated_class;
+
+        // Add id's for courses
+        // if (course.sections.length > 1) consolelog(course.subject_key, course.catalog_number, course.sections)
+        course.course_id = cid;
+        // and for sections
+        
+        course.sections.forEach(function (sct) {
+            sct.course_id = cid;
+        });
+    });
+
+    return data;
+};
+
+
+var inject_descriptions = function (data) {
+    console.log('Adding descriptions');
+    data.courses.forEach(function (course) {
+        Object.keys(descdb.forCID(course.course_id)).forEach(function (key) {
+            course[key] = descdb.forCID(course.course_id)[key];
+        });
+    });
+
+    return data;
+};
 
 
 var remap_homepage = function (data) {
@@ -113,6 +166,8 @@ var remap_homepage = function (data) {
     }
 
     data.subjects = subjarr;
+
+    return data;
 };
 
 var remap_courses = function (subject) {
@@ -193,6 +248,8 @@ var remap_courses = function (subject) {
         magic(obj, 'topics', 'topic', function () {});
 
     });
+
+    return subject;
 };
 
 /**
