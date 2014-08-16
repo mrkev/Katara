@@ -14,6 +14,7 @@
   "repository": "https://github.com/mrkev/Katara",
   "license": "MIT",
   "dependencies": {
+    "datejs": "^1.0.0-rc1",
     "es6-promise": "^1.0.0",
     "obender": "^0.1.1",
     "request-promise": "0.0.4",

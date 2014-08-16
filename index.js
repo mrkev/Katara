@@ -38,8 +38,7 @@ module.exports = (function () {
         subj =  subj === undefined || subj === null ? ''     : subj;
 
         var self  = this;
-        var url   = self._url + term + '/' + subj + (subj === '' ? '' : '/') 
-                    + 'xml/';
+        var url   = self._url + term + '/' + subj + (subj === '' ? '' : '/') + 'xml/';
 
         var tereshkova = new Promise(function (resolve, reject) {
 
@@ -74,7 +73,13 @@ module.exports = (function () {
             .then(cidify)
 
             // Inject descriptions
-            .then(inject_descriptions);
+            .then(inject_descriptions)
+
+            // Parse meeting times
+            .then(midnightmillify)
+
+
+            //.then(numberify)
 
         }
 
@@ -129,6 +134,31 @@ var cidify = function (data) {
 };
 
 
+var midnightmillify = function (data) {
+    data.courses.forEach(function (course) {
+        course.sections.forEach(function (section) {
+            section.meeting.start_tm = midnightMillis(section.meeting.start_time);
+            section.meeting.end_tm = midnightMillis(section.meeting.end_time);
+        });
+    });
+
+    return data;
+};
+
+require('datejs');
+
+/**
+ * Converts string time representation to milliseconds since midnight.
+ * @param  {String} time Time to convert
+ * @return {Number}      Milliseconds since midnight represented by the given 
+ *                       time.
+ */
+var midnightMillis = function (time) {
+  return  Date.parse('July 26th, 2014, ' + time) - 
+      Date.parse('July 26th, 2014, 12:00AM');
+};
+
+
 var inject_descriptions = function (data) {
     console.log('Adding descriptions');
     data.courses.forEach(function (course) {
@@ -170,6 +200,11 @@ var remap_homepage = function (data) {
     return data;
 };
 
+/**
+ * Renames stuff.
+ * @param  {[type]} subject [description]
+ * @return {[type]}         [description]
+ */
 var remap_courses = function (subject) {
     // Term, dateloaded, datetime_loaded
     subject.term          = subject.courses.term;
@@ -229,8 +264,15 @@ var remap_courses = function (subject) {
             if (sct.meeting) {
                 remove_singleton_string_arrays(sct.meeting);
                 remap({
-                    'facility_ldescr' : 'facility_description',
-                    'meeting_pattern_sdescr' : 'meeting_pattern'
+                    'facility_ldescr' : 'facility',
+                    'meeting_pattern_sdescr' : 'pattern'
+
+                    // 'start_time' : 'start_time_str',
+                    // 'end_time' : 'end_time_str',
+
+                    // 'start_date' : 'start_date_str',
+                    // 'end_date' : 'end_date_str',
+
                 }, sct.meeting);
 
                 if (sct.meeting.instructors !== undefined)  {
