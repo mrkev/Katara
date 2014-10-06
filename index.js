@@ -189,7 +189,7 @@ var remap_homepage = function (data) {
 
         // --XML ++JSON
         delete obj.xml;
-        obj.json = 'http://api-mrkev.rhcloud.com/redapi/roster?' + obj.key;
+        // obj.json = 'http://api-mrkev.rhcloud.com/redapi/roster?' + obj.key;
 
 
         subjarr.push(data.subjects.subject[subj]);
